@@ -58,7 +58,11 @@ app.controller('contentController', function ($scope, $controller, uploadService
         contentService.dele($scope.selectIds).success(
             function (response) {
                 if (response.success) {
+                    $scope.deleteArrayElements();
                     $scope.reloadList();//刷新列表
+                } else {
+                    $scope.deleteArrayElements();
+                    alert(response.message);
                 }
             }
         );
@@ -93,6 +97,7 @@ app.controller('contentController', function ($scope, $controller, uploadService
         );
     };
 
+    $scope.status = ['无效', '有效'];
     //加载广告分类列表
     $scope.findContentCategoryList = function () {
         contentCategoryService.findAll().success(

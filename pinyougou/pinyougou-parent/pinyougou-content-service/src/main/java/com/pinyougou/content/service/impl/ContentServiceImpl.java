@@ -3,6 +3,7 @@ package com.pinyougou.content.service.impl;
 import java.util.List;
 
 import com.pinyougou.content.service.ContentService;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.github.pagehelper.Page;
@@ -53,6 +54,9 @@ public class ContentServiceImpl implements ContentService {
      */
     @Override
     public void add(TbContent content) {
+        if (StringUtils.isEmpty(content.getStatus())){
+            content.setStatus("0");
+        }
         contentMapper.insert(content);
         redisTemplate.boundHashOps("content").delete(content.getCategoryId());
     }

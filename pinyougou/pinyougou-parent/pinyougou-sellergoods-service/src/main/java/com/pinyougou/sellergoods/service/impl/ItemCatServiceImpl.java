@@ -13,18 +13,23 @@ import com.pinyougou.pojo.TbItemCatExample.Criteria;
 import com.pinyougou.sellergoods.service.ItemCatService;
 
 import entity.PageResult;
+import org.springframework.data.redis.core.BoundHashOperations;
+import org.springframework.data.redis.core.RedisTemplate;
 
 /**
  * 服务实现层
  *
  * @author Administrator
  */
-@SuppressWarnings("JavaDoc")
+@SuppressWarnings({"JavaDoc", "SpringJavaAutowiredMembersInspection"})
 @Service
 public class ItemCatServiceImpl implements ItemCatService {
 
     @Autowired
     private TbItemCatMapper itemCatMapper;
+    @Autowired
+    private RedisTemplate redisTemplate;
+    private Boolean flag = true;
 
     /**
      * 查询全部
@@ -41,7 +46,7 @@ public class ItemCatServiceImpl implements ItemCatService {
     public PageResult findPage(int pageNum, int pageSize) {
         PageHelper.startPage(pageNum, pageSize);
         Page<TbItemCat> page = (Page<TbItemCat>) itemCatMapper.selectByExample(null);
-        return new PageResult<TbItemCat>(page.getTotal(), page.getResult());
+        return new PageResult<>(page.getTotal(), page.getResult());
     }
 
     /**
@@ -49,6 +54,8 @@ public class ItemCatServiceImpl implements ItemCatService {
      */
     @Override
     public void add(TbItemCat itemCat) {
+        //重新写入缓存,需要标记为true
+        flag = true;
         itemCatMapper.insert(itemCat);
     }
 
@@ -58,6 +65,8 @@ public class ItemCatServiceImpl implements ItemCatService {
      */
     @Override
     public void update(TbItemCat itemCat) {
+        //重新写入缓存,需要标记为true
+        flag = true;
         itemCatMapper.updateByPrimaryKey(itemCat);
     }
 
@@ -90,6 +99,8 @@ public class ItemCatServiceImpl implements ItemCatService {
             }
 
         }
+        //重新写入缓存,需要标记为true
+        flag = true;
     }
 
 
@@ -108,7 +119,7 @@ public class ItemCatServiceImpl implements ItemCatService {
         }
 
         Page<TbItemCat> page = (Page<TbItemCat>) itemCatMapper.selectByExample(example);
-        return new PageResult<TbItemCat>(page.getTotal(), page.getResult());
+        return new PageResult<>(page.getTotal(), page.getResult());
     }
 
     /**
@@ -125,6 +136,24 @@ public class ItemCatServiceImpl implements ItemCatService {
         TbItemCatExample tbItemCatExample = new TbItemCatExample();
         Criteria criteria = tbItemCatExample.createCriteria();
         criteria.andParentIdEqualTo(parentId);
+
+
+        //将数据存入缓存提供前台使用(每次执行查询的时候，一次性读取缓存进行存储 (因为每次增删改都要执行此方法))
+        //调用标记类,通过标记判定是否需要存入到缓存
+        //(如果是查询就默认写入缓存一次，如果是曾删改带来的查询，就在对应的增删改带来的方法中设置flag来重写缓存)
+        if (flag) {
+            List<TbItemCat> list = findAll();
+            for (TbItemCat tbItemCat : list) {
+                @SuppressWarnings("unchecked")
+                BoundHashOperations itemCat = redisTemplate.boundHashOps("itemCat");
+                //noinspection unchecked
+                itemCat.put(tbItemCat.getName(), tbItemCat.getTypeId());
+            }
+            System.out.println("更新缓存:商品分类表");
+            flag = false;
+        }
+
+
         return itemCatMapper.selectByExample(tbItemCatExample);
     }
 }

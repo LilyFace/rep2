@@ -58,7 +58,11 @@ app.controller('contentController', function ($scope, $controller, uploadService
         contentService.dele($scope.selectIds).success(
             function (response) {
                 if (response.success) {
+                    $scope.deleteArrayElements();
                     $scope.reloadList();//刷新列表
+                } else {
+                    $scope.deleteArrayElements();
+                    alert(response.message);
                 }
             }
         );

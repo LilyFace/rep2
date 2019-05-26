@@ -18,6 +18,7 @@ import com.pinyougou.pojo.TbTypeTemplateExample.Criteria;
 import com.pinyougou.sellergoods.service.TypeTemplateService;
 
 import entity.PageResult;
+import org.springframework.data.redis.core.RedisTemplate;
 
 /**
  * 服务实现层
@@ -33,6 +34,11 @@ public class TypeTemplateServiceImpl implements TypeTemplateService {
 
     @Autowired
     private TbSpecificationOptionMapper specificationOptionMapper;
+
+    @Autowired
+    private RedisTemplate redisTemplate;
+
+    private Boolean flag = true;
 
     /**
      * 查询全部
@@ -57,6 +63,7 @@ public class TypeTemplateServiceImpl implements TypeTemplateService {
      */
     @Override
     public void add(TbTypeTemplate typeTemplate) {
+        flag = true;
         typeTemplateMapper.insert(typeTemplate);
     }
 
@@ -66,6 +73,7 @@ public class TypeTemplateServiceImpl implements TypeTemplateService {
      */
     @Override
     public void update(TbTypeTemplate typeTemplate) {
+        flag = true;
         typeTemplateMapper.updateByPrimaryKey(typeTemplate);
     }
 
@@ -88,6 +96,7 @@ public class TypeTemplateServiceImpl implements TypeTemplateService {
         for (Long id : ids) {
             typeTemplateMapper.deleteByPrimaryKey(id);
         }
+        flag = true;
     }
 
 
@@ -115,6 +124,11 @@ public class TypeTemplateServiceImpl implements TypeTemplateService {
         }
 
         Page<TbTypeTemplate> page = (Page<TbTypeTemplate>) typeTemplateMapper.selectByExample(example);
+        //存入数据到缓存
+        if (flag) {
+            saveToRedis();
+            flag = false;
+        }
         return new PageResult(page.getTotal(), page.getResult());
     }
 
@@ -147,5 +161,38 @@ public class TypeTemplateServiceImpl implements TypeTemplateService {
             map.put("options", tbSpecificationOptions);
         }
         return maps;
+    }
+
+    /**
+     * @param
+     * @description: 保存模板数据(规格, 品牌)到redis
+     * @return: void
+     * @author: YangRunTao
+     * @date: 2019/05/23 14:56
+     * @throws:
+     **/
+    private void saveToRedis() {
+        List<TbTypeTemplate> typeTemplates = findAll();
+
+        for (TbTypeTemplate typeTemplate : typeTemplates) {
+            //保存品牌({key=模板id,value=品牌数据})
+            List<Map> brandList = JSON.parseArray(typeTemplate.getBrandIds(), Map.class);
+            redisTemplate.boundHashOps("brandList").put(typeTemplate.getId(), brandList);
+            //存储规格列表(包含规格选项)
+            List<Map> specList = JSON.parseArray(typeTemplate.getSpecIds(), Map.class);
+            //循环遍历得到规格id查询规格选项
+            for (Map map : specList) {
+                long idLong = (Integer) map.get("id");
+                //查询规格列表
+                //规格选项选项条件查询
+                TbSpecificationOptionExample tbSpecificationOptionExample = new TbSpecificationOptionExample();
+                TbSpecificationOptionExample.Criteria criteria = tbSpecificationOptionExample.createCriteria();
+                criteria.andSpecIdEqualTo(idLong);
+                List<TbSpecificationOption> tbSpecificationOptionsList = specificationOptionMapper.selectByExample(tbSpecificationOptionExample);
+                map.put("options",tbSpecificationOptionsList);
+            }
+            redisTemplate.boundHashOps("specList").put(typeTemplate.getId(), specList);
+            System.out.println("保存(规格, 品牌)到redis");
+        }
     }
 }
