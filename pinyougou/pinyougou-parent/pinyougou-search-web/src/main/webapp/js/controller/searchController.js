@@ -1,4 +1,10 @@
-app.controller('searchController', function ($scope, searchService) {
+app.controller('searchController', function ($scope, $location, searchService) {
+
+    //加载查询字符串
+    $scope.loadkeywords = function () {
+        $scope.searchMap.keywords = $location.search()['keywords'];
+        $scope.search();
+    };
 
     //通用标记
     $scope.flag = true;
@@ -20,7 +26,9 @@ app.controller('searchController', function ($scope, searchService) {
         'price': '',
         'spec': {},
         'pageNo': 1,
-        'pageSize': 40
+        'pageSize': 40,
+        'sortField': '',
+        'sort': ''
     };
     $scope.addSearchItem = function (key, value) {
         if (key === 'category' || key === 'brand' || key === 'price') {
@@ -29,13 +37,6 @@ app.controller('searchController', function ($scope, searchService) {
         } else {
             $scope.searchMap.spec[key] = value;
         }
-        //都添加了设置flag为false然选择div不显示
-        /*if ($scope.searchMap['keywords'] !== ''
-            && $scope.searchMap['category'] !== ''
-            && $scope.searchMap['brand'] !== '' && $scope.searchMap.spec !== '{}') {
-            $scope.flag = false;
-        }*/
-
         console.log($scope.searchMap);
         //执行搜索
         $scope.search();
@@ -51,15 +52,9 @@ app.controller('searchController', function ($scope, searchService) {
 
         //执行搜索
         $scope.search();
-        //都删除了设置flag为true然选择div不显示
-        /* if ($scope.searchMap['keywords'] === ''
-             && $scope.searchMap['category'] === ''
-             && $scope.searchMap['brand'] === '' && $scope.searchMap.spec['spec'] === {}) {
-             $scope.flag = true;
-         }*/
     };
 
-    //构建分页条
+//构建分页条
     $scope.buildPageLabel = function () {
         //分页数组
         $scope.pageLabel = [];
@@ -102,7 +97,7 @@ app.controller('searchController', function ($scope, searchService) {
         console.log($scope.pageLabel);
     };
 
-    //根据页码查询
+//根据页码查询
     $scope.queryByPage = function (pageNo) {
         pageNo = parseInt(pageNo);
         //页码验证
@@ -113,8 +108,8 @@ app.controller('searchController', function ($scope, searchService) {
         $scope.search();
     };
 
-    //是否可以点击上一页，下一页的逻辑
-    //当前在第一页(默认)
+//是否可以点击上一页，下一页的逻辑
+//当前在第一页(默认)
     $scope.isStartPage = true;
     $scope.isEndPage = false;
     $scope.CanOrCanNotClickStartOrEndPage = function () {
@@ -126,10 +121,30 @@ app.controller('searchController', function ($scope, searchService) {
             //最后一页可以点击上一页
             $scope.isStartPage = false;
             $scope.isEndPage = true;
-        }else {
+        } else {
             //中间都可以点
             $scope.isStartPage = false;
             $scope.isEndPage = false;
         }
+    };
+
+//设置排序规则
+    $scope.sortSearch = function (sortField, sort) {
+        $scope.searchMap.sortField = sortField;
+        $scope.searchMap.sort = sort;
+        $scope.search();
+    };
+
+//搜索关键字是品牌不显示品牌
+    $scope.keywordsIsBrandTest = function () {
+        // noinspection LoopStatementThatDoesntLoopJS
+        for (var i = 0; i < $scope.resultMap.brandList.length; i++) {
+            if ($scope.searchMap.keywords.indexOf($scope.resultMap.brandList[i].text) >= 0) {
+                return true;
+            }
+        }
+        return false;
     }
-});
+
+})
+;

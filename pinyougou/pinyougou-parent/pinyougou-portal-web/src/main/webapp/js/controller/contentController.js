@@ -9,5 +9,11 @@ app.controller("contentController",function($scope,contentService){
                 $scope.contentList[2] –> 今日推荐*/
             }
         );
+    };
+
+    //搜索跳转
+    $scope.search=function(){
+        location.href="http://localhost:9104/search.html#?keywords="+$scope.keywords;
     }
+
 });

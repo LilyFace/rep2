@@ -19,7 +19,7 @@
 
 </head>
 
-<body ng-app="pinyougou" ng-controller="searchController">
+<body ng-app="pinyougou" ng-controller="searchController" ng-init="loadkeywords()">
 <!-- 头部栏位 -->
 <!--页面顶部-->
 <div id="nav-bottom">
@@ -159,9 +159,11 @@
                 </li>
             </ul>
             <ul class="tags-choose">
-                <li class="tag" ng-if="searchMap.category!=''" ng-click="removeSearchItem('category')">
+                <li class="tag" ng-if="searchMap.category!=''"
+                    ng-click="removeSearchItem('category')">
                     商品分类：{{searchMap.category}}<i class="sui-icon icon-tb-close"></i></li>
-                <li class="tag" ng-if="searchMap.brand!=''" ng-click="removeSearchItem('brand')">
+                <li class="tag" ng-if="searchMap.brand!=''"
+                    ng-click="removeSearchItem('brand')">
                     品牌：{{searchMap.brand}}<i class="sui-icon icon-tb-close"></i>
                 </li>
                 <li class="tag" ng-repeat="(key,value) in searchMap.spec" ng-click="removeSearchItem(key)">
@@ -188,17 +190,17 @@
                 <div class="fl key">商品分类</div>
                 <div class="fl value">
                     <span ng-repeat="category in resultMap.categoryList">
-                        <a href="#" ng-click="addSearchItem('category',category)">{{category}}</a>
+                        <a href="javascript:void(0)" ng-click="addSearchItem('category',category)">{{category}}</a>
                     </span>
                 </div>
                 <div class="fl ext"></div>
             </div>
-            <div class="type-wrap logo" ng-if="searchMap.brand==''" style="border:1px dotted lightgray">
+            <div class="type-wrap logo" ng-if="searchMap.brand=='' && keywordsIsBrandTest()==false && resultMap.brandList!=null" style="border:1px dotted lightgray">
                 <div class="fl key brand" ng-if="resultMap.brandList!=null">品牌</div>
                 <div class="value logos" ng-if="searchMap.brand==''">
                     <ul class="logo-list">
                         <li ng-repeat="brand in resultMap.brandList">
-                            <a href="#" ng-click="addSearchItem('brand',brand.text)">{{brand.text}}</a>
+                            <a href="javascript:void(0)" ng-click="addSearchItem('brand',brand.text)">{{brand.text}}</a>
                         </li>
                     </ul>
                 </div>
@@ -213,7 +215,7 @@
                 <div class="fl value">
                     <ul class="type-list">
                         <li ng-repeat="pojo in spec.options">
-                            <a href="#" ng-click="addSearchItem(spec.text,pojo.optionName)">{{pojo.optionName}}</a>
+                            <a href="javascript:void(0)" ng-click="addSearchItem(spec.text,pojo.optionName)">{{pojo.optionName}}</a>
                         </li>
                     </ul>
                 </div>
@@ -318,21 +320,26 @@
     <div class="sui-navbar">
         <div class="navbar-inner filter">
             <ul class="sui-nav">
-                <li class="active">
+                <li class="active" ng-click="sortSearch('','')">
                     <a href="#">综合</a>
                 </li>
                 <li>
                     <a href="#">销量</a>
                 </li>
                 <li>
-                    <a href="#">新品</a>
+                    <a href="#" ng-click="sortSearch('updatetime','DESC')">新品</a>
                 </li>
+
                 <li>
                     <a href="#">评价</a>
                 </li>
                 <li>
-                    <a href="#">价格</a>
+                    <a href="#" ng-click="sortSearch('price','ASC')">价格↑</a>
                 </li>
+                <li>
+                    <a href="#" ng-click="sortSearch('price','DESC')">价格↓</a>
+                </li>
+
             </ul>
         </div>
     </div>
@@ -341,7 +348,8 @@
             <li class="yui3-u-1-5" ng-repeat="item in resultMap.rows">
                 <div class="list-wrap">
                     <div class="p-img">
-                        <a href="item.html" target="_blank"><img ng-src="{{item.image}}" alt=""/></a>
+                        <!--suppress HtmlUnknownTarget -->
+                        <a href="http://localhost:9105/{{item.goodsId}}.html" target="_blank"><img ng-src="{{item.image}}" alt=""/></a>
                     </div>
                     <div class="price">
                         <strong>
@@ -372,17 +380,17 @@
         <div class="sui-pagination pagination-xlarge">
             <ul>
                 <li class="prev {{isStartPage==true?'disabled':''}}">
-                    <a href="#" ng-click="queryByPage(searchMap.pageNo-1);CanOrCanNotClickStartOrEndPage()"
+                    <a href="javascript:void(0)" ng-click="queryByPage(searchMap.pageNo-1);CanOrCanNotClickStartOrEndPage()"
                     >«上一页</a>
                 </li>
                 <li class="dotted" ng-if="firstDot==true"><span>...</span></li>
                 <li ng-repeat="p in pageLabel" class="{{p==searchMap.pageNo?'active':''}}">
-                    <a href="#" ng-click="queryByPage(p);CanOrCanNotClickStartOrEndPage()">{{p}}</a>
+                    <a href="javascript:void(0)" ng-click="queryByPage(p);CanOrCanNotClickStartOrEndPage()">{{p}}</a>
                 </li>
 
                 <li class="dotted" ng-if="lastDot==true"><span>...</span></li>
                 <li class="next {{isEndPage==true?'disabled':''}}">
-                    <a href="#" ng-click="queryByPage(searchMap.pageNo+1);CanOrCanNotClickStartOrEndPage()"
+                    <a href="javascript:void(0)" ng-click="queryByPage(searchMap.pageNo+1);CanOrCanNotClickStartOrEndPage()"
                     >下一页»</a>
                 </li>
             </ul>
@@ -480,10 +488,7 @@
         </ul>
     </div>
 </div>
-</div>
-</div>
-<!-- 底部栏位 -->
-<!--页面底部-->
+
 <div class="clearfix footer">
     <div class="py-container">
         <div class="footlink">

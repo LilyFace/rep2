@@ -76,8 +76,10 @@
                                 <!--searchAutoComplete-->
                                 <div class="input-append">
                                     <label for="autocomplete"></label>
-                                    <input id="autocomplete" type="text" class="input-error input-xxlarge"/>
-                                    <button class="sui-btn btn-xlarge btn-danger" type="button">搜索</button>
+                                    <input id="autocomplete" type="text" class="input-error input-xxlarge"
+                                           ng-model="keywords"/>
+                                    <button class="sui-btn btn-xlarge btn-danger" type="button" ng-click="search()">搜索
+                                    </button>
                                 </div>
                             </form>
                         </div>

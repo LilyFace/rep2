@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.pinyougou.pojo.TbGoods;
 
+import com.pinyougou.pojo.TbItem;
 import com.pinyougou.pojogroup.Goods;
 import entity.PageResult;
 
@@ -20,7 +21,7 @@ public interface GoodsService {
      *
      * @return
      */
-    public List<TbGoods> findAll();
+    List<TbGoods> findAll();
 
 
     /**
@@ -28,19 +29,19 @@ public interface GoodsService {
      *
      * @return
      */
-    public PageResult findPage(int pageNum, int pageSize);
+    PageResult findPage(int pageNum, int pageSize);
 
 
     /**
      * 增加
      */
-    public void add(TbGoods goods);
+    void add(TbGoods goods);
 
 
     /**
      * 修改
      */
-    public void update(Goods goods);
+    void update(Goods goods);
 
 
     /**
@@ -49,7 +50,7 @@ public interface GoodsService {
      * @param id
      * @return
      */
-    public Goods findOne(Long id);
+    Goods findOne(Long id);
 
 
     /**
@@ -57,7 +58,7 @@ public interface GoodsService {
      *
      * @param ids
      */
-    public void delete(Long[] ids);
+    void delete(Long[] ids);
 
     /**
      * 分页
@@ -66,7 +67,7 @@ public interface GoodsService {
      * @param pageSize 每页记录数
      * @return
      */
-    public PageResult findPage(TbGoods goods, int pageNum, int pageSize);
+    PageResult findPage(TbGoods goods, int pageNum, int pageSize);
 
     /**
      * @param goods
@@ -76,7 +77,7 @@ public interface GoodsService {
      * @date: 2019/05/14 15:44
      * @throws:
      **/
-    public void add(Goods goods);
+    void add(Goods goods);
 
     /**
      * 批量修改状态
@@ -84,8 +85,19 @@ public interface GoodsService {
      * @param ids
      * @param status
      */
-    public void updateStatus(Long[] ids, String status);
+    void updateStatus(Long[] ids, String status);
 
     //上下架商品
     void upAndDownGoods(Long[] ids, String isMarketableStatus);
+
+    /**
+     * @param ids
+     * @param status
+     * @description: 根据商品ID和状态查询Item表信息
+     * @return: java.util.List<com.pinyougou.pojo.TbItem>
+     * @author: YangRunTao
+     * @date: 2019/05/27 14:46
+     * @throws:
+     **/
+    List<TbItem> findItemListByIdsAndStatus(Long[] ids, String status);
 }

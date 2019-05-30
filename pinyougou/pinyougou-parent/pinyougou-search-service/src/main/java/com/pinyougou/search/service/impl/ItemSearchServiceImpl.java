@@ -6,15 +6,13 @@ import com.pinyougou.search.service.ItemSearchService;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.solr.core.SolrTemplate;
 import org.springframework.data.solr.core.query.*;
 import org.springframework.data.solr.core.query.result.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @Author: YangRunTao
@@ -77,6 +75,41 @@ public class ItemSearchServiceImpl implements ItemSearchService {
     }
 
     /**
+     * @param
+     * @description: 导入商品数据
+     * @return: void
+     * @author: YangRunTao
+     * @date: 2019/05/27 14:58
+     * @throws:
+     **/
+    @Override
+    public void importItemListInSolr(List<TbItem> list) {
+        solrTemplate.saveBeans(list);
+        solrTemplate.commit();
+        System.out.println("\033[32;4m" + "更新solr的sku数据" + "\033[0m");
+    }
+
+    /**
+     * @param ids
+     * @description: 根据spu id(商品id)删除商品数据
+     * @return: void
+     * @author: YangRunTao
+     * @date: 2019/05/27 15:27
+     * @throws:
+     **/
+    @Override
+    public void deleteItemListInSolr(Long[] ids) {
+        System.out.println("删除商品ID" + Arrays.toString(ids));
+        List<Long> idsList = Arrays.asList(ids);
+        Query query = new SimpleQuery();
+        Criteria criteria = new Criteria("item_goodsid").in(idsList);
+        query.addCriteria(criteria);
+        solrTemplate.delete(query);
+        solrTemplate.commit();
+        System.out.println("\033[32;4m" + "删除solr的sku数据" + "\033[0m");
+    }
+
+    /**
      * @param searchMap
      * @description: 商品列表搜索sku
      * @return: java.util.Map<java.lang.String, java.lang.Object>
@@ -85,6 +118,8 @@ public class ItemSearchServiceImpl implements ItemSearchService {
      * @throws:
      **/
     private Map<String, Object> searchItemList(Map searchMap) {
+        //TODO(有时间写写根据销量和评价排序)
+
         Map<String, Object> map = new HashMap<>();
         //关键字空格处理
         String keywordsHasSpace = (String) searchMap.get("keywords");
@@ -174,6 +209,22 @@ public class ItemSearchServiceImpl implements ItemSearchService {
         query.setOffset((pageNo - 1) * pageSize);//从第几条记录查询10 10
         query.setRows(pageSize);
 
+        //6.排序
+        //获得排序方式
+        String sortManner = (String) searchMap.get("sort");
+        //获得排序的域名
+        String sortField = (String) searchMap.get("sortField");
+        //过滤为空的情况
+        if (StringUtils.isNotEmpty(sortManner) && StringUtils.isNotEmpty(sortField)) {
+            if (sortManner.equals("ASC")) {
+                Sort sort = new Sort(Sort.Direction.ASC, "item_" + sortField);
+                query.addSort(sort);
+            }
+            if (sortManner.equals("DESC")) {
+                Sort sort = new Sort(Sort.Direction.DESC, "item_" + sortField);
+                query.addSort(sort);
+            }
+        }
 
         //注入查询对象
         query.addCriteria(criteria);
@@ -206,7 +257,9 @@ public class ItemSearchServiceImpl implements ItemSearchService {
      **/
     private List<String> searchCategoryList(Map searchMap) {
         List<String> list = new ArrayList<>();
-        Object keywords = searchMap.get("keywords");
+        //关键字空格处理
+        String keywordsHasSpace = (String) searchMap.get("keywords");
+        String keywords = keywordsHasSpace.replace(" ", "");
         //使用solr的分组查询
         Query query = new SimpleQuery();
         Criteria criteria = new Criteria("item_keywords").is(keywords);

@@ -2,7 +2,11 @@ package com.pinyougou.shop.controller;
 
 import java.util.List;
 
+import com.pinyougou.page.service.ItemPageService;
+import com.pinyougou.pojo.TbItem;
 import com.pinyougou.pojogroup.Goods;
+import com.pinyougou.search.service.ItemSearchService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,8 +28,14 @@ import entity.Result;
 @RequestMapping("/goods")
 public class GoodsController {
 
-    @Reference
+    @Reference(timeout = 40000)
     private GoodsService goodsService;
+
+    @Reference(timeout = 40000)
+    private ItemSearchService itemSearchService;
+
+    @Reference(timeout = 40000)
+    private ItemPageService itemPageService;
 
     /**
      * 返回全部列表
@@ -67,6 +77,11 @@ public class GoodsController {
 
         try {
             goodsService.update(goods);
+            //删除solr库中的数据
+            itemSearchService.deleteItemListInSolr(new Long[]{goods.getGoods().getId()});
+            //删除对应的商品详情静态页面
+            itemPageService.deleteItemHtml(goods.getGoods().getId());
+
             return new Result(true, "修改成功");
         } catch (Exception e) {
             e.printStackTrace();
@@ -95,6 +110,8 @@ public class GoodsController {
     public Result delete(Long[] ids) {
         try {
             goodsService.delete(ids);
+            //删除solr库中的数据
+            itemSearchService.deleteItemListInSolr(ids);
             return new Result(true, "删除成功");
         } catch (Exception e) {
             e.printStackTrace();
@@ -158,11 +175,56 @@ public class GoodsController {
     @RequestMapping("/upAndDownGoods")
     public Result upAndDownGoods(@RequestBody Long[] ids, String isMarketableStatus) {
         try {
-            goodsService.upAndDownGoods(ids,isMarketableStatus);
+            goodsService.upAndDownGoods(ids, isMarketableStatus);
+            //(我认为并非运营商审核通过就立即跟新前台就显示sku信息，应该取决于商家是否上架，以后有时间修改)
+            //按照SPU ID查询 SKU列表(状态为1)
+            if (StringUtils.isNotEmpty(isMarketableStatus)) {
+                if (isMarketableStatus.equals("1")) {
+                    //查询出修改为1的数据以提供我们将其增加到solr
+                    List<TbItem> tbItems = goodsService.findItemListByIdsAndStatus(ids, isMarketableStatus);
+                    //将其添加到solr库
+                    if (tbItems != null && tbItems.size() > 0) {
+                        itemSearchService.importItemListInSolr(tbItems);
+                    } else {
+                        System.out.println("没有明细数据！");
+                    }
+
+                    //生成和删除静态页
+                    if (ids.length > 0) {
+                        //静态页生成
+                        for (Long goodsId : ids) {
+                            itemPageService.genItemHtml(goodsId);
+                        }
+                    }
+                } else if (isMarketableStatus.equals("0")) {
+                    //删除solr库中的数据
+                    itemSearchService.deleteItemListInSolr(ids);
+
+                    //删除静态页
+                    for (Long goodsId : ids) {
+                        itemPageService.deleteItemHtml(goodsId);
+                    }
+                }
+            }
+
             return new Result(true, "操作成功");
         } catch (Exception e) {
             e.printStackTrace();
             return new Result(false, "操作失败");
         }
+
     }
+
+
+
+    /**
+     * 生成静态页（测试）
+     *
+     * @param goodsId
+     */
+    @RequestMapping("/genHtml")
+    public void genHtml(Long goodsId) {
+        itemPageService.genItemHtml(goodsId);
+    }
+
 }

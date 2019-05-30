@@ -1,5 +1,8 @@
 package com.pinyougou.search.service;
 
+import com.pinyougou.pojo.TbItem;
+
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -19,4 +22,24 @@ public interface ItemSearchService {
      * @throws:
      **/
     Map<String, Object> search(Map searchMap);
+
+    /**
+     * @param
+     * @description: 导入商品数据
+     * @return: void
+     * @author: YangRunTao
+     * @date: 2019/05/27 14:54
+     * @throws:
+     **/
+    void importItemListInSolr(List<TbItem> list);
+
+    /**
+     * @param ids
+     * @description: 删除商品数据
+     * @return: void
+     * @author: YangRunTao
+     * @date: 2019/05/27 15:22
+     * @throws:
+     **/
+    void deleteItemListInSolr(Long[] ids);
 }

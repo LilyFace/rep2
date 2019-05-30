@@ -1,5 +1,6 @@
 package com.pinyougou.sellergoods.service.impl;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -279,7 +280,35 @@ public class GoodsServiceImpl implements GoodsService {
                 TbGoods tbGoods = goodsMapper.selectByPrimaryKey(id);
                 tbGoods.setIsMarketable(isMarketableStatus);
                 goodsMapper.updateByPrimaryKey(tbGoods);
+
+                //修改sku的状态
+                TbItemExample tbItemExample = new TbItemExample();
+                TbItemExample.Criteria criteria = tbItemExample.createCriteria();
+                criteria.andGoodsIdEqualTo(id);
+                List<TbItem> tbItems = itemMapper.selectByExample(tbItemExample);
+                for (TbItem tbItem : tbItems) {
+                    tbItem.setStatus(isMarketableStatus);
+                    itemMapper.updateByPrimaryKey(tbItem);
+                }
             }
         }
+    }
+
+    /**
+     * @param ids
+     * @param status
+     * @description: 根据商品ID和状态查询Item表信息
+     * @return: java.util.List<com.pinyougou.pojo.TbItem>
+     * @author: YangRunTao
+     * @date: 2019/05/27 14:47
+     * @throws:
+     **/
+    @Override
+    public List<TbItem> findItemListByIdsAndStatus(Long[] ids, String status) {
+        TbItemExample tbItemExample = new TbItemExample();
+        TbItemExample.Criteria criteria = tbItemExample.createCriteria();
+        criteria.andGoodsIdIn(Arrays.asList(ids));
+        criteria.andStatusEqualTo(status);
+        return itemMapper.selectByExample(tbItemExample);
     }
 }
