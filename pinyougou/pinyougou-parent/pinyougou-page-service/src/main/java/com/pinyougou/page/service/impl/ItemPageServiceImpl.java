@@ -1,7 +1,5 @@
 package com.pinyougou.page.service.impl;
 
-import com.alibaba.druid.sql.visitor.functions.If;
-import com.alibaba.dubbo.config.annotation.Service;
 import com.pinyougou.mapper.TbGoodsDescMapper;
 import com.pinyougou.mapper.TbGoodsMapper;
 import com.pinyougou.mapper.TbItemCatMapper;
@@ -13,6 +11,7 @@ import freemarker.template.Template;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfig;
 
 import java.io.*;
@@ -27,7 +26,7 @@ import java.util.Map;
  * @Date: 2019/05/28 16:37
  * @Modified By:
  */
-@SuppressWarnings({"SpringJavaAutowiredMembersInspection", "JavaDoc"})
+@SuppressWarnings({"JavaDoc"})
 @Service
 public class ItemPageServiceImpl implements ItemPageService {
 
@@ -122,7 +121,7 @@ public class ItemPageServiceImpl implements ItemPageService {
     }
 
     /**
-     * @param goodsId
+     * @param goodsIds
      * @description: 删除详情页
      * @return: java.lang.Boolean
      * @author: YangRunTao
@@ -130,9 +129,14 @@ public class ItemPageServiceImpl implements ItemPageService {
      * @throws:
      **/
     @Override
-    public Boolean deleteItemHtml(Long goodsId) {
-        File file = new File(pagedir + goodsId + ".html");
-        System.out.println("\033[32;4m" + "删除静态文件" + "\033[0m");
-        return FileUtils.deleteQuietly(file);
+    public Boolean deleteItemHtml(Long[] goodsIds) {
+        for (Long goodsId : goodsIds) {
+            File file = new File(pagedir + goodsId + ".html");
+            System.out.println("\033[32;4m" + "删除静态文件" + "\033[0m");
+            if (!FileUtils.deleteQuietly(file)) {
+                return false;
+            }
+        }
+        return true;
     }
 }

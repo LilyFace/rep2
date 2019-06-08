@@ -19,6 +19,7 @@
     <tx:advice id="tx">
         <tx:attributes>
             <tx:method name="find*" read-only="true"/>
+            <tx:method name="onMessage" propagation="NEVER"/>
             <tx:method name="*"/>
         </tx:attributes>
     </tx:advice>

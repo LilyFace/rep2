@@ -19,12 +19,12 @@ public interface ItemPageService {
     Boolean genItemHtml(Long goodsId);
 
     /**
-     * @param goodsId
+     * @param goodsIds
      * @description: 删除商品详细页
      * @return: java.lang.Boolean
      * @author: YangRunTao
      * @date: 2019/05/29 14:47
      * @throws:
      **/
-    Boolean deleteItemHtml(Long goodsId);
+    Boolean deleteItemHtml(Long[] goodsIds);
 }

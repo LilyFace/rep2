@@ -15,18 +15,18 @@
         http://code.alibabatech.com/schema/dubbo/dubbo.xsd
         http://www.springframework.org/schema/context
         http://www.springframework.org/schema/context/spring-context.xsd">
-    <!--dubbo服务暴露端口-->
-    <dubbo:protocol name="dubbo" port="20885"/>
-    <!--服务应用名-->
-    <dubbo:application name="pinyougou-page-service"/>
-    <!--注册中心地址-->
-    <dubbo:registry address="zookeeper://192.168.25.128:2181"/>
-    <!--需要配置为dubbo服务的包-->
-    <dubbo:annotation package="com.pinyougou.page.service.impl"/>
-
-    <bean id="freemarkerConfig"	class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer">
-        <property name="templateLoaderPath" value="/WEB-INF/ftl/" />
-        <property name="defaultEncoding" value="UTF-8" />
+    <!-- &lt;!&ndash;dubbo服务暴露端口&ndash;&gt;
+     <dubbo:protocol name="dubbo" port="20885"/>
+     &lt;!&ndash;服务应用名&ndash;&gt;
+     <dubbo:application name="pinyougou-page-service"/>
+     &lt;!&ndash;注册中心地址&ndash;&gt;
+     <dubbo:registry address="zookeeper://192.168.25.128:2181"/>
+     &lt;!&ndash;需要配置为dubbo服务的包&ndash;&gt;
+     <dubbo:annotation package="com.pinyougou.page.service.impl"/>-->
+    <context:component-scan base-package="com.pinyougou.page.service.impl"/>
+    <bean id="freemarkerConfig" class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer">
+        <property name="templateLoaderPath" value="/WEB-INF/ftl/"/>
+        <property name="defaultEncoding" value="UTF-8"/>
     </bean>
 
 </beans>

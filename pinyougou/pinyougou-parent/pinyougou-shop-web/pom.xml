@@ -100,6 +100,14 @@
             <artifactId>mybatis</artifactId>
         </dependency>
 
+        <!--消息中间件-->
+        <dependency>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>activemq-client</artifactId>
+            <version>5.13.4</version>
+        </dependency>
+
+
         <!-- 身份验证 -->
         <dependency>
             <groupId>org.springframework.security</groupId>
@@ -109,16 +117,16 @@
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-config</artifactId>
         </dependency>
-        <dependency>
+      <!--  <dependency>
             <groupId>com.pinyougou</groupId>
             <artifactId>pinyougou-search-interface</artifactId>
             <version>1.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
+        </dependency>-->
+      <!--  <dependency>
             <groupId>com.pinyougou</groupId>
             <artifactId>pinyougou-page-interface</artifactId>
             <version>1.0-SNAPSHOT</version>
-        </dependency>
+        </dependency>-->
 
     </dependencies>
     <build>
